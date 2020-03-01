@@ -163,11 +163,7 @@ void loop()
     else if (readingPEDAL3 == LOW && previousPEDAL3 == HIGH) {
       previousPEDAL3 = LOW;
     }
-    else {
-      return;
-    }
   }
-
 
   Usb.Task();
   uint32_t t1 = (uint32_t)micros();
@@ -175,9 +171,8 @@ void loop()
   {
     MIDI_poll();
   }
-  
+
   doDelay(t1, (uint32_t)micros(), 1000);
-  
 }
 
 // Send "Program Change" MIDI Message
@@ -365,9 +360,14 @@ void processSysExMsg() {
     pedalStatus1 = sysExMsg[6] & 1;
     pedalStatus2 = sysExMsg[26] & 1;
     pedalStatus3 = sysExMsg[47] & 1;
+    Serial.print("pedalStatus1"); Serial.println(pedalStatus1);
+    Serial.print("pedalStatus2"); Serial.println(pedalStatus2);
+    Serial.print("pedalStatus3"); Serial.println(pedalStatus3);
     updateLedPedals();
   }
-  else if (sysExMsg[SYSEX_MSG_TYPE_POSITION] == SYSEX_MSG_TYPE_DISABLE_PEDAL) {
+  else if (sysExMsg[SYSEX_MSG_TYPE_POSITION] == SYSEX_MSG_TYPE_DISABLE_PEDAL &&
+          sysExMsg[6] == 0 && sysExMsg[7] == 0 && sysExMsg[8] == 0) {
+    Serial.print("pedalStatus DISABLE"); Serial.println(sysExMsg[5]);
     switch(sysExMsg[5]) {
       case 0: pedalStatus1 = 0;
               break;
@@ -427,13 +427,12 @@ byte MIDI_poll_getCurrentPreset()
   return currentPreset;
 }
 
+// UPDATE LED PEDALS
 void updateLedPedals() {
   digitalWrite(outPin1, pedalStatus1);
   digitalWrite(outPin2, pedalStatus2);
   digitalWrite(outPin3, pedalStatus3);
 }
-
-
 
 // Delay time (max 16383 us)
 void doDelay(uint32_t t1, uint32_t t2, uint32_t delayTime)
@@ -451,8 +450,7 @@ void doDelay(uint32_t t1, uint32_t t2, uint32_t delayTime)
   }
 }
 
-
-
+// LOADING LEDS
 void loadingLeds(int timeLength) {
   for (byte j = 0; j < timeLength / 300; ++j) {
     digitalWrite(outPinErr, HIGH);
@@ -484,16 +482,7 @@ void errorIndication() {
   while(true);
 }
 
-
-
-
-
-
-
-
-
-
-
+// EXTRACT SYSEX DATA
 uint8_t xtractSysExData(uint8_t *p, uint8_t *buf)
 {
   uint8_t rc = 0;
