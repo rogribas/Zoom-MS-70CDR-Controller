@@ -1,7 +1,7 @@
 # Zoom-MS-70CDR-Controller
 Code used for my custom controller pedal to control the Zoom MS-70CDR
 
-Arduino UNO
+Arduino UNO <br />
 Arduino USB Host Shield
 
 ## Images
